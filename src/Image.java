@@ -48,7 +48,7 @@ public class Image {
 		int n=0;
 		for(int x=0;x<this.getWidth();x++) {
 			for(int y=0;y<this.getHeight();y++) {
-				derivative[n]=(image.color[x][y]-this.color[x][y])/totalColors;
+				derivative[n]=-(image.color[x][y]-this.color[x][y])/totalColors;
 				n++;
 			}
 		}

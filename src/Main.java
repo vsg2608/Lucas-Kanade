@@ -8,7 +8,7 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 public class Main {
-	
+	////////////////////////////MAIN/////////////////////////////////////////
 	public static void main(String[] args) throws IOException {
 		BufferedImage image1=null;
 		BufferedImage image2=null;
@@ -33,18 +33,31 @@ public class Main {
 		
 		writeImage(image1,"res/Output1.jpg");
 		writeImage(image2,"res/Output2.jpg");
+		int noOfPixels=width*height;
 		float[][] Ixy= img1.spaceDerivative();
-		float[] v=null;
+		float[] v=new float[2];
 		float[] It= img1.timeDerivative(img2);
-		System.out.println(width*height);
-		for(int x=0;x<10;x++)
-			System.out.println(It[x]);
 		
+		float[][] AtA = {{0,0},{0,0}};
+		float[] Atb= {0,0};	
 		
+		for(int i=0;i<noOfPixels;i++) {
+			AtA[0][0]+=Ixy[i][0]*Ixy[i][0];
+			AtA[0][1]+=Ixy[i][0]*Ixy[i][1];
+			AtA[1][1]+=Ixy[i][1]*Ixy[i][1];
+			Atb[0]+=It[i]*Ixy[i][0];
+			Atb[1]+=It[i]*Ixy[i][1];
+		}
+		AtA[1][0]=AtA[0][1];
+		float[][] AtAi=Matrix.inverseMatrix2(AtA);
+		v[0]=AtAi[0][0]*Atb[0]+AtAi[0][1]*Atb[1];
+		v[1]=AtAi[1][0]*Atb[0]+AtAi[1][1]*Atb[1];
 		
+		System.out.print(v[0]+" "+v[1]);
+
+			
 	}
-	
-	
+	////////////////////////////////////////////////////////////////////////////
 	
 	public static BufferedImage convertToBW(BufferedImage image) {
 		int width = image.getWidth();
