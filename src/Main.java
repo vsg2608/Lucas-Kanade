@@ -8,6 +8,10 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 public class Main {
+	
+	public static float Sigma=2;
+	
+	
 	////////////////////////////MAIN/////////////////////////////////////////
 	public static void main(String[] args) throws IOException {
 		BufferedImage image1=null;
@@ -15,48 +19,65 @@ public class Main {
 		image1=readImage(image1,"res/Screenshot (8).png");
 		image2=readImage(image2,"res/Screenshot (9).png");
 		
-		int width=image1.getWidth();
-		int height=image1.getHeight();	
+		int width=image1.getWidth();		//Image width
+		int height=image1.getHeight();		//Image height
 		
+		//Code to resize image if required
 //		image1= resizeImage(image1, width, height);
 //		image2= resizeImage(image2, width, height);
 		
-		width=image1.getWidth();
-		height=image1.getHeight();	
+		width=image1.getWidth();					//Recalculation of width after resizing
+		height=image1.getHeight();					//Recalculation of height after resizing
 		
-		image1=convertToBW(image1);
-		float[][] color= getColorMatrix(image1);
-		Image img1=new Image(width,height,color);
-		image2=convertToBW(image2);
-		color= getColorMatrix(image2);
-		Image img2=new Image(width,height,color);
+		image1=convertToBW(image1);					//Convert to Black and White
+		float[][] color= getColorMatrix(image1);	//Get a single color matrix
+		Image img1=new Image(width,height,color);	//Initializing new frame image
+		image2=convertToBW(image2);					//Convert to Black and white image for second frame
+		color= getColorMatrix(image2);				//Get a single color matrix
+		Image img2=new Image(width,height,color);	//Initialization of second frame
 		
-		writeImage(image1,"res/Output1.jpg");
-		writeImage(image2,"res/Output2.jpg");
-		int noOfPixels=width*height;
-		float[][] Ixy= img1.spaceDerivative();
-		float[] v=new float[2];
-		float[] It= img1.timeDerivative(img2);
+		writeImage(image1,"res/Output1.jpg");		//Writing black and white image
+		writeImage(image2,"res/Output2.jpg");		//Writing black and white image
 		
-		float[][] AtA = {{0,0},{0,0}};
+		int noOfPixels=width*height;				//Total no of pixels
+		float[][] Ixy= img1.spaceDerivative();		//space derivative matrix
+		float[] v=new float[2];						//velocity matrix
+		float[] It= img1.timeDerivative(img2);		//Time derivative matrix
+		
+		//Initialization of matrix
+		float[][] AtA = {{0,0},{0,0}};				
 		float[] Atb= {0,0};	
 		
+		
+		//Coordinates of point
+		int X=width/2;
+		int Y=height/2;
+		
+		//Velocity calculation
 		for(int i=0;i<noOfPixels;i++) {
-			AtA[0][0]+=Ixy[i][0]*Ixy[i][0];
-			AtA[0][1]+=Ixy[i][0]*Ixy[i][1];
-			AtA[1][1]+=Ixy[i][1]*Ixy[i][1];
-			Atb[0]+=It[i]*Ixy[i][0];
-			Atb[1]+=It[i]*Ixy[i][1];
+			int y=i%height;
+			int x=i/height;
+			float weight= gaussianFunction(Math.sqrt((X-x)*(X-x)+(Y-y)*(Y-y)));
+			//System.out.println(weight);
+			AtA[0][0]+=weight*Ixy[i][0]*Ixy[i][0];
+			AtA[0][1]+=weight*Ixy[i][0]*Ixy[i][1];
+			AtA[1][1]+=weight*Ixy[i][1]*Ixy[i][1];
+			Atb[0]+=weight*It[i]*Ixy[i][0];
+			Atb[1]+=weight*It[i]*Ixy[i][1];
 		}
 		AtA[1][0]=AtA[0][1];
 		float[][] AtAi=Matrix.inverseMatrix2(AtA);
 		v[0]=AtAi[0][0]*Atb[0]+AtAi[0][1]*Atb[1];
 		v[1]=AtAi[1][0]*Atb[0]+AtAi[1][1]*Atb[1];
 		
-		System.out.print(v[0]+" "+v[1]);
-
+		System.out.println(width+" "+height);
+		System.out.println(v[0]+" "+v[1]);
 			
 	}
+	
+	
+	
+	
 	////////////////////////////////////////////////////////////////////////////
 	
 	public static BufferedImage convertToBW(BufferedImage image) {
@@ -165,6 +186,10 @@ public class Main {
 	    graphics2D.dispose();
 
 	    return bufferedImage;
+	}
+	
+	public static float gaussianFunction(double d) {
+		return (float) ((float) Math.exp(-d/(2*Sigma*Sigma))/Math.sqrt(2*Math.PI*Sigma*Sigma));
 	}
 	
 	

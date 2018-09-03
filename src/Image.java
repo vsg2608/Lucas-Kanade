@@ -36,7 +36,6 @@ public class Image {
 					derivative[n][1]=(this.color[x][y]-this.color[x][y-1])/totalColors;
 				else 
 					derivative[n][1]=(this.color[x][y+1]-this.color[x][y-1])/2/totalColors;
-				
 				n++;
 			}
 		}
