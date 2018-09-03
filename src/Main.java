@@ -18,8 +18,8 @@ public class Main {
 		int width=image1.getWidth();
 		int height=image1.getHeight();	
 		
-		image1= resizeImage(image1, width, height);
-		image2= resizeImage(image2, width, height);
+//		image1= resizeImage(image1, width, height);
+//		image2= resizeImage(image2, width, height);
 		
 		width=image1.getWidth();
 		height=image1.getHeight();	
