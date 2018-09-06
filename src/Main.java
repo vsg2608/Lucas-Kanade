@@ -43,41 +43,57 @@ public class Main {
 		float[][] AtA = {{0,0},{0,0}};				
 		float[] Atb= {0,0};	
 		
-		
-		//Coordinates of point
-		int X=width/2;
-		int Y=height/2;
-		
-		//Velocity calculation
-		for(int i=0;i<noOfPixels;i++) {
-			int y=i%height;
-			int x=i/height;
-			float weight= gaussianFunction(Math.sqrt((X-x)*(X-x)+(Y-y)*(Y-y)));
-			//System.out.println(weight);
-			AtA[0][0]+=weight*Ixy[i][0]*Ixy[i][0];
-			AtA[0][1]+=weight*Ixy[i][0]*Ixy[i][1];
-			AtA[1][1]+=weight*Ixy[i][1]*Ixy[i][1];
-			Atb[0]+=weight*It[i]*Ixy[i][0];
-			Atb[1]+=weight*It[i]*Ixy[i][1];
-		}
-		AtA[1][0]=AtA[0][1];
-		float[][] AtAi=Matrix.inverseMatrix2(AtA);
-		v[0]=AtAi[0][0]*Atb[0]+AtAi[0][1]*Atb[1];
-		v[1]=AtAi[1][0]*Atb[0]+AtAi[1][1]*Atb[1];
-		
-		System.out.println(width+" "+height);
-		System.out.println(v[0]+" "+v[1]);
-		
-		
-	    int white = (254<<24) | (255<<16) | (255<<8) | 255;
-	    int red = (254<<24) | (255<<16) | (0<<8) | 0;
-	    
-	    for(int i=0;i<25;i++)
-	    	image1.setRGB(X+i, (int) (Y+i*v[1]/v[0]), white);
-	    image1.setRGB(X, (int) (Y), red);
-		
+		int noOfW=20;
+		int noOfH=20;
+		for(int X=width/noOfW; X<width-width/noOfW; X=X+width/noOfW)
+			for(int Y=height/noOfH; Y<height-height/noOfH; Y=Y+height/noOfH){
+				//Velocity calculation
+				for(int i=0;i<noOfPixels;i++) {
+					int y=i%height;
+					int x=i/height;
+					float weight= gaussianFunction(Math.sqrt((X-x)*(X-x)+(Y-y)*(Y-y)));
+					//System.out.println(weight);
+					AtA[0][0]+=weight*Ixy[i][0]*Ixy[i][0];
+					AtA[0][1]+=weight*Ixy[i][0]*Ixy[i][1];
+					AtA[1][1]+=weight*Ixy[i][1]*Ixy[i][1];
+					Atb[0]+=weight*It[i]*Ixy[i][0];
+					Atb[1]+=weight*It[i]*Ixy[i][1];
+				}
+				AtA[1][0]=AtA[0][1];
+				float[][] AtAi=Matrix.inverseMatrix2(AtA);
+				v[0]=AtAi[0][0]*Atb[0]+AtAi[0][1]*Atb[1];
+				v[1]=AtAi[1][0]*Atb[0]+AtAi[1][1]*Atb[1];
+//				
+//				System.out.println(width+" "+height);
+//				System.out.println(v[0]+" "+v[1]);
+				
+				
+			    int white = (254<<24) | (255<<16) | (255<<8) | 255;
+			    int red = (254<<24) | (255<<16) | (100<<8) | 100;
+			    int green = (254<<24) | (100<<16) | (255<<8) | 100;
+			   
+			    int multiplierForArrows=100;
+			    if(v[0]>v[1])
+				    for(int i=0;i<v[0]*multiplierForArrows;i++){
+				    	try{
+				    		image1.setRGB(X+i, (int) (Y+i*v[1]/v[0]), red);
+				    	}catch (Exception e) {
+				            System.out.println("Out of bound");
+				        }
+				    }
+			    else
+			    	for(int i=0;i<v[1]*multiplierForArrows;i++){
+				    	try{
+				    		image1.setRGB((int) (X+i*v[0]/v[1]), Y+i, red);
+				    	}catch (Exception e) {
+				            System.out.println("Out of bound");
+				        }
+				    }
+			    image1.setRGB(X, (int) (Y), green);
+			}
 		
 		Image.displayImage(image1);				//Display image on window
+		Image.displayImage(image2);
 		Image.writeImage(image1,"res/Output0.jpg");		//Writing black and white image
 		Image.writeImage(image2,"res/Output1.jpg");		//Writing black and white image
 			
@@ -92,7 +108,6 @@ public class Main {
 		for(int x=0;x< width;x++) {
 			for(int y=0;y<height;y++) {
 				int p=image.getRGB(x, y);
-				int a = (p>>24) & 0xff;
 			    int BW = (p>>16) & 0xff;
 			    color[x][y]=BW;
 			}
